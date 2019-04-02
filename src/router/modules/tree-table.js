@@ -7,6 +7,7 @@ const treeTableRouter = {
   component: Layout,
   redirect: '/table/complex-table',
   name: 'TreeTable',
+  hidden: true,
   meta: {
     title: 'treeTable',
     icon: 'tree-table'
