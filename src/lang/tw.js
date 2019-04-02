@@ -1,5 +1,6 @@
 export default {
   route: {
+    channel: '通路',
     dashboard: '首頁',
     introduction: '簡述',
     documentation: '文檔',
@@ -110,6 +111,9 @@ export default {
     backToTopTips2: '可自定義按鈕的樣式、show/hide、出現的高度、返回的位置 如需文字提示，可在外部使用Element的el-tooltip元素',
     imageUploadTips: '由於我在使用時它只有vue@1版本，而且和mockjs不兼容，所以自己改造了一下，如果大家要使用的話，優先還是使用官方版本。'
   },
+  channel: {
+    name: '名稱'
+  },
   table: {
     dynamicTips1: '固定表頭, 按照表頭順序排序',
     dynamicTips2: '不固定表頭, 按照點擊順序排序',
@@ -120,7 +124,7 @@ export default {
     type: '類型',
     remark: '點評',
     search: '搜索',
-    add: '添加',
+    add: '新增',
     export: '導出',
     reviewer: '審核人',
     id: '序號',

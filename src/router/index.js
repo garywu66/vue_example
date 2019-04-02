@@ -102,6 +102,19 @@ export const constantRoutes = [
         meta: { title: 'guide', icon: 'guide', noCache: true }
       }
     ]
+  },
+  {
+    path: '/channel',
+    component: Layout,
+    redirect: '/channel/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/channel/index'),
+        name: 'Channel',
+        meta: { title: 'channel', icon: 'list', noCache: true }
+      }
+    ]
   }
 ]
 
