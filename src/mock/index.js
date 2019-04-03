@@ -1,5 +1,6 @@
 import Mock from 'mockjs'
 import loginAPI from './login'
+import channelAPI from './channel'
 import articleAPI from './article'
 import remoteSearchAPI from './remoteSearch'
 import transactionAPI from './transaction'
@@ -31,6 +32,11 @@ Mock.mock(/\/roles/, 'get', roleAPI.getRoles)
 Mock.mock(/\/roles$/, 'post', roleAPI.addRole)
 Mock.mock(/\/roles\/[A-Za-z0-9]+/, 'put', roleAPI.updateRole)
 Mock.mock(/\/roles\/[A-Za-z0-9]+/, 'delete', roleAPI.deleteRole)
+
+// channel
+Mock.mock(/\/channel\/list/, 'get', channelAPI.getList)
+Mock.mock(/\/channel\/create/, 'post', channelAPI.createChannel)
+Mock.mock(/\/channel\/update/, 'post', channelAPI.updateChannel)
 
 // 文章相关
 Mock.mock(/\/article\/list/, 'get', articleAPI.getList)

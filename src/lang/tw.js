@@ -112,7 +112,7 @@ export default {
     imageUploadTips: '由於我在使用時它只有vue@1版本，而且和mockjs不兼容，所以自己改造了一下，如果大家要使用的話，優先還是使用官方版本。'
   },
   channel: {
-    name: '名稱'
+    name: '通路'
   },
   table: {
     dynamicTips1: '固定表頭, 按照表頭順序排序',

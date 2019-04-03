@@ -1,14 +1,14 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" :placeholder="$t('channel.name')" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.name" :placeholder="$t('channel.name')" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
     </div>
 
     <el-table
       :key="tableKey"
-      v-loading="listLoading"
+      ref="singleTable"
       :data="list"
       border
       fit
@@ -23,13 +23,13 @@
       </el-table-column>
       <el-table-column :label="$t('channel.name')" min-width="150px">
         <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
+          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
-          <el-button v-if="scope.row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">
+          <el-button v-if="scope.row.status!='deleted'" size="mini" type="danger" @click="handleDelete(scope)">
             {{ $t('table.delete') }}
           </el-button>
         </template>
@@ -40,8 +40,8 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('channel.name')" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item :label="$t('channel.name')" prop="name">
+          <el-input v-model="temp.name" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { fetchList, createArticle, updateArticle } from '@/api/article'
+import { fetchList, createChannel, updateChannel } from '@/api/channel'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -62,32 +62,20 @@ export default {
   name: 'ComplexTable',
   components: { Pagination },
   directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
   data() {
     return {
       tableKey: 0,
       list: null,
       total: 0,
-      listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        title: undefined,
+        name: undefined,
         sort: '+id'
       },
-      showReviewer: false,
       temp: {
         id: undefined,
-        title: ''
+        name: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -96,9 +84,8 @@ export default {
         create: 'Create'
       },
       rules: {
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
-      },
-      downloadLoading: false
+        name: [{ required: true, message: 'name is required', trigger: 'blur' }]
+      }
     }
   },
   created() {
@@ -106,27 +93,32 @@ export default {
   },
   methods: {
     getList() {
-      this.listLoading = true
       fetchList(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
-
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
       })
     },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
     },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作成功',
-        type: 'success'
+    handleDelete(tr) {
+      this.$confirm('確定刪除此通路?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+        this.list.splice(tr.$index, 1) // 也可這樣刪除 this.list.splice( this.list.indexOf(tr.row), 1 )
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -145,7 +137,7 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        title: ''
+        name: ''
       }
     },
     handleCreate() {
@@ -161,7 +153,7 @@ export default {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
+          createChannel(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -186,7 +178,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateArticle(tempData).then(() => {
+          updateChannel(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
@@ -204,16 +196,6 @@ export default {
           })
         }
       })
-    },
-    handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
     }
   }
 }
