@@ -2,17 +2,9 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/channel/list',
+    url: '/api/admin/channels',
     method: 'get',
     params: query
-  })
-}
-
-export function fetchChannel(id) {
-  return request({
-    url: '/channel/detail',
-    method: 'get',
-    params: { id }
   })
 }
 

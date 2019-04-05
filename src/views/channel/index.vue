@@ -94,7 +94,7 @@ export default {
   methods: {
     getList() {
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
+        this.list = response.data.data
         this.total = response.data.total
       })
     },

@@ -29,7 +29,7 @@ export default {
 
     return {
       total: mockList.length,
-      items: pageList
+      data: pageList
     }
   },
   getChannel: (config) => {
