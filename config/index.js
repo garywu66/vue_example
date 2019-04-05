@@ -9,14 +9,21 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
-
+    proxyTable: {
+      '/laravelexample': {                        // 自訂 local 端的位置
+        target: 'http://127.0.0.1:7000/',  // 遠端 URL Domain
+        changeOrigin: true,
+        pathRewrite: {
+          '^/laravelexample': ''
+        }
+      }
+    },
     // Various Dev Server settings
 
     // can be overwritten by process.env.HOST
     // if you want dev by ip, please set host: '0.0.0.0'
     host: 'localhost',
-    port: 9527, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    port: 7001, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: true,
     errorOverlay: true,
     notifyOnErrors: false,
