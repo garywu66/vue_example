@@ -34,8 +34,8 @@ Mock.mock(/\/roles\/[A-Za-z0-9]+/, 'put', roleAPI.updateRole)
 Mock.mock(/\/roles\/[A-Za-z0-9]+/, 'delete', roleAPI.deleteRole)
 
 // channel
-Mock.mock(/\/channel\/list/, 'get', channelAPI.getList)
-Mock.mock(/\/channel\/create/, 'post', channelAPI.createChannel)
+Mock.mock(/\/api\/admin\/channels/, 'get', channelAPI.getList)
+Mock.mock(/\/api\/admin\/channels/, 'post', channelAPI.createChannel)
 Mock.mock(/\/channel\/update/, 'post', channelAPI.updateChannel)
 
 // 文章相关

@@ -29,9 +29,7 @@
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
-          <el-button v-if="scope.row.status!='deleted'" size="mini" type="danger" @click="handleDelete(scope)">
-            {{ $t('table.delete') }}
-          </el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ $t('table.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -54,7 +52,7 @@
 </template>
 
 <script>
-import { fetchList, createChannel, updateChannel } from '@/api/channel'
+import { fetchList, createChannel, updateChannel, deleteChannel } from '@/api/channel'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -102,24 +100,6 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    handleDelete(tr) {
-      this.$confirm('確定刪除此通路?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
-        this.list.splice(tr.$index, 1) // 也可這樣刪除 this.list.splice( this.list.indexOf(tr.row), 1 )
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
-      })
-    },
     sortChange(data) {
       const { prop, order } = data
       if (prop === 'id') {
@@ -151,17 +131,24 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createChannel(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          createChannel(this.temp).then(response => {
             this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '创建成功',
-              type: 'success',
-              duration: 2000
-            })
+            if (response.data.code === 1) {
+              this.getList()
+              this.$notify({
+                title: '成功',
+                message: '创建成功',
+                type: 'success',
+                duration: 2000
+              })
+            } else {
+              this.$notify({
+                title: '失敗',
+                message: response.data.message,
+                type: 'error',
+                duration: 2000
+              })
+            }
           })
         }
       })
@@ -178,21 +165,67 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateChannel(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
+          updateChannel(tempData).then(response => {
             this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '更新成功',
-              type: 'success',
-              duration: 2000
-            })
+            if (response.data.code === 1) {
+              for (const v of this.list) {
+                if (v.id === this.temp.id) {
+                  const index = this.list.indexOf(v)
+                  this.list.splice(index, 1, this.temp)
+                  break
+                }
+              }
+              this.$notify({
+                title: '成功',
+                message: '更新成功',
+                type: 'success',
+                duration: 2000
+              })
+            } else {
+              this.$notify({
+                title: '失敗',
+                message: response.data.message,
+                type: 'error',
+                duration: 2000
+              })
+            }
+          })
+        }
+      })
+    },
+    handleDelete(row) {
+      this.$confirm('確定刪除此通路?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.temp = Object.assign({}, row) // copy obj
+        this.deleteData()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    deleteData() {
+      const tempData = Object.assign({}, this.temp)
+      deleteChannel(tempData).then(response => {
+        if (response.data.code === 1) {
+          this.getList()
+          // this.list.splice(this.temp.id, 1) // 也可這樣刪除 this.list.splice( this.list.indexOf(tr.row), 1 )
+          this.$notify({
+            title: '成功',
+            message: '刪除成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$notify({
+            title: '失敗',
+            message: response.data.message,
+            type: 'error',
+            duration: 2000
           })
         }
       })

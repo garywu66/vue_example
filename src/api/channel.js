@@ -10,7 +10,7 @@ export function fetchList(query) {
 
 export function createChannel(data) {
   return request({
-    url: '/channel/create',
+    url: '/api/admin/channels',
     method: 'post',
     data
   })
@@ -18,8 +18,15 @@ export function createChannel(data) {
 
 export function updateChannel(data) {
   return request({
-    url: '/channel/update',
-    method: 'post',
+    url: `/api/admin/channels/${data.id}`,
+    method: 'put',
     data
+  })
+}
+
+export function deleteChannel(data) {
+  return request({
+    url: `/api/admin/channels/${data.id}`,
+    method: 'delete'
   })
 }
