@@ -18,11 +18,9 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('channel.name')" min-width="150px">
+      <el-table-column :label="$t('shop.name')" min-width="150px">
         <template slot-scope="scope">
-          <router-link :to="'/channel/'+scope.row.id+'/shop'" class="link-type">
-            <span>{{ scope.row.name }}</span>
-          </router-link>
+          {{ scope.row.name }}
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
@@ -37,7 +35,7 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('channel.name')" prop="name">
+        <el-form-item :label="$t('shop.name')" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
       </el-form>
@@ -51,7 +49,7 @@
 </template>
 
 <script>
-import { fetchList, createChannel, updateChannel, deleteChannel } from '@/api/channel'
+import { fetchList, createShop, updateShop, deleteShop } from '@/api/shop'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
@@ -59,6 +57,7 @@ export default {
   components: { Pagination },
   data() {
     return {
+      channelId: this.$route.params.channel_id,
       tableKey: 0,
       list: null,
       total: 0,
@@ -86,7 +85,7 @@ export default {
   },
   methods: {
     getList() {
-      fetchList(this.listQuery).then(response => {
+      fetchList(this.channelId, this.listQuery).then(response => {
         this.list = response.data.data
         this.total = response.data.total
       })
@@ -108,7 +107,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createChannel(this.temp).then(response => {
+          createShop(this.channelId, this.temp).then(response => {
             this.dialogFormVisible = false
             if (response.data.code === 1) {
               this.getList()
@@ -142,7 +141,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateChannel(tempData).then(response => {
+          updateShop(this.channelId, tempData).then(response => {
             this.dialogFormVisible = false
             if (response.data.code === 1) {
               for (const v of this.list) {
@@ -171,7 +170,7 @@ export default {
       })
     },
     handleDelete(row) {
-      this.$confirm('確定刪除此通路?', '提示', {
+      this.$confirm('確定刪除此門市?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -187,10 +186,9 @@ export default {
     },
     deleteData() {
       const tempData = Object.assign({}, this.temp)
-      deleteChannel(tempData).then(response => {
+      deleteShop(this.channelId, tempData).then(response => {
         if (response.data.code === 1) {
           this.getList()
-          // this.list.splice(this.temp.id, 1) // 也可這樣刪除 this.list.splice( this.list.indexOf(tr.row), 1 )
           this.$notify({
             title: '成功',
             message: '刪除成功',

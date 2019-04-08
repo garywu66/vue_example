@@ -117,6 +117,33 @@ export const constantRoutes = [
         meta: { title: 'channel', icon: 'list', noCache: true }
       }
     ]
+  },
+  {
+    path: '/channel/:channel_id(\\d+)/shop',
+    component: Layout,
+    redirect: '/channel/:channel_id(\\d+)/shop/list',
+    hidden: true,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/shop/shopList'),
+        name: 'Shop',
+        meta: { title: 'shop', icon: 'list', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/device',
+    component: Layout,
+    redirect: '/device/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/device/index'),
+        name: 'Device',
+        meta: { title: 'device', icon: 'list', noCache: true }
+      }
+    ]
   }
 ]
 

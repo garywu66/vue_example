@@ -1,6 +1,8 @@
 export default {
   route: {
     channel: '通路',
+    shop: '門市',
+    device: '廣告機',
     dashboard: '首頁',
     introduction: '簡述',
     documentation: '文檔',
@@ -113,6 +115,12 @@ export default {
   },
   channel: {
     name: '通路'
+  },
+  shop: {
+    name: '門市'
+  },
+  device: {
+    name: '廣告機'
   },
   table: {
     dynamicTips1: '固定表頭, 按照表頭順序排序',

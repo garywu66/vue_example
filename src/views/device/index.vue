@@ -18,11 +18,14 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('channel.name')" min-width="150px">
+      <el-table-column :label="$t('device.name')" min-width="150px">
         <template slot-scope="scope">
-          <router-link :to="'/channel/'+scope.row.id+'/shop'" class="link-type">
-            <span>{{ scope.row.name }}</span>
-          </router-link>
+          <span>{{ scope.row.name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column min-width="150px">
+        <template slot-scope="scope">
+          <span>{{ scope.row.channel_name+' '+scope.row.shop_name }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
@@ -37,8 +40,13 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('channel.name')" prop="name">
+        <el-form-item :label="$t('device.name')" prop="name">
           <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item :label="$t('shop.name')" prop="shop_id">
+          <el-select v-model="temp.shop_id" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in shopList" :key="item.id" :label="item.channel.name+'--'+item.name" :value="item.id" />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -51,8 +59,16 @@
 </template>
 
 <script>
-import { fetchList, createChannel, updateChannel, deleteChannel } from '@/api/channel'
+import { fetchList, createDevice, updateDevice, deleteDevice } from '@/api/device'
+import { fetchListWithChannel as fetchShopList } from '@/api/shop'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+
+const calendarTypeOptions = [
+  { key: 'CN', display_name: 'China' },
+  { key: 'US', display_name: 'USA' },
+  { key: 'JP', display_name: 'Japan' },
+  { key: 'EU', display_name: 'Eurozone' }
+]
 
 export default {
   name: 'ComplexTable',
@@ -66,8 +82,11 @@ export default {
         page: 1,
         limit: 20
       },
+      shopList: null,
+      calendarTypeOptions,
       temp: {
         id: undefined,
+        shop_id: '',
         name: ''
       },
       dialogFormVisible: false,
@@ -83,6 +102,7 @@ export default {
   },
   created() {
     this.getList()
+    this.getShopList()
   },
   methods: {
     getList() {
@@ -91,9 +111,15 @@ export default {
         this.total = response.data.total
       })
     },
+    getShopList() {
+      fetchShopList().then(response => {
+        this.shopList = response.data
+      })
+    },
     resetTemp() {
       this.temp = {
         id: undefined,
+        shop_id: '',
         name: ''
       }
     },
@@ -108,7 +134,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createChannel(this.temp).then(response => {
+          createDevice(this.temp).then(response => {
             this.dialogFormVisible = false
             if (response.data.code === 1) {
               this.getList()
@@ -142,16 +168,10 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateChannel(tempData).then(response => {
+          updateDevice(tempData).then(response => {
             this.dialogFormVisible = false
             if (response.data.code === 1) {
-              for (const v of this.list) {
-                if (v.id === this.temp.id) {
-                  const index = this.list.indexOf(v)
-                  this.list.splice(index, 1, this.temp)
-                  break
-                }
-              }
+              this.getList()
               this.$notify({
                 title: '成功',
                 message: '更新成功',
@@ -187,7 +207,7 @@ export default {
     },
     deleteData() {
       const tempData = Object.assign({}, this.temp)
-      deleteChannel(tempData).then(response => {
+      deleteDevice(tempData).then(response => {
         if (response.data.code === 1) {
           this.getList()
           // this.list.splice(this.temp.id, 1) // 也可這樣刪除 this.list.splice( this.list.indexOf(tr.row), 1 )
